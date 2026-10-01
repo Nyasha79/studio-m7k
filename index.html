@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пульт Nyasha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --молоко:#FAF5EF; --пудра:#E6D8CC; --чернила:#4A372B;
+  --заголовок:"Cormorant Garamond",Georgia,serif; --текст:"Jost","Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--молоко);color:var(--чернила);font-family:var(--текст);font-weight:300;font-size:17px;line-height:1.45;min-height:100vh}
+main{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:2px solid var(--чернила);outline-offset:3px}
+b{font-weight:400}
+h2{font-family:var(--заголовок);font-weight:400;font-size:1.7rem;margin:72px 0 22px;text-transform:uppercase;letter-spacing:.08em}
+
+/* шапка: название и подпись вырезаны с обложки книги */
+.шапка{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
+.шапка h1{font-size:1rem;font-weight:400;line-height:1}
+.шапка h1 span{display:block;font-family:var(--заголовок);font-style:italic;font-size:1.25rem;margin-bottom:14px}
+.имя{display:block;width:clamp(260px,46vw,520px);height:auto;margin-left:-6px}
+.подпись{display:block;width:clamp(190px,24vw,270px);height:auto;margin:8px 0 0 -8px}
+.черта{margin-left:7.2em;font-size:.85rem}
+
+/* Мила стоит на полоске счёта, без рамки и фона */
+.мила{display:flex;align-items:flex-end;gap:6px}
+.мила img{width:auto;height:210px;flex:none;position:relative;z-index:20;margin-bottom:-8px}
+.реплика{background:#fff;border-radius:20px 20px 4px 20px;padding:10px 14px;max-width:230px;font-size:.95rem;margin-bottom:70px}
+
+.счёт{display:flex;align-items:center;gap:14px}
+.полоса{flex:1;height:2px;background:var(--пудра);overflow:hidden}
+.полоса i{display:block;height:100%;width:0;background:var(--чернила);transition:width .5s cubic-bezier(.2,.9,.3,1.2)}
+.счёт b{font-weight:300;font-size:.95rem;white-space:nowrap}
+
+/* откуда берутся ролики */
+.путь{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-bottom:26px;counter-reset:шаг}
+.путь li{counter-increment:шаг;position:relative;border-top:1px solid var(--чернила);padding:14px 0 0 40px;font-size:.9rem;line-height:1.4}
+.путь li::before{content:counter(шаг);position:absolute;left:0;top:10px;font-family:var(--заголовок);font-size:1.7rem}
+
+/* плашки: одна плашка = один ролик на сегодня */
+.лента{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.кадр{position:relative;aspect-ratio:9/16;border-radius:20px;overflow:hidden;color:#fff;box-shadow:0 18px 30px -14px #3a2317aa;transition:filter .4s}
+.сцена{position:absolute;inset:0;background:#b98a63 center/cover no-repeat}
+.закат{background-image:url("shot-sunset.jpg")} .тропинка{background-image:url("shot-path.jpg")} .лодка{background-image:url("shot-boat.jpg")}
+.берег{background-image:url("shot-shore.jpg")} .лестница{background-image:url("shot-stairs.jpg")} .бухта{background-image:url("shot-bay.jpg")}
+.нутро{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;padding:14px}
+.нутро::before{content:"";position:absolute;inset:25% 0 0;background:linear-gradient(transparent,#000b);z-index:-1}
+.вид{align-self:flex-start;background:#ffffff26;backdrop-filter:blur(6px);border:1px solid #ffffff55;border-radius:99px;padding:3px 11px;font-size:.78rem;font-weight:400}
+.кадр.главный .вид{background:#fff;color:var(--чернила);border-color:#fff}
+.кадр h3{font-family:var(--заголовок);font-weight:400;font-size:1.5rem;line-height:1.05;margin:auto 0 12px;text-shadow:0 2px 14px #0007}
+.этапы{display:grid;gap:6px;margin-bottom:10px}
+.этап{display:flex;align-items:center;gap:9px;text-align:left;color:#fff;font-size:.9rem;font-weight:400;padding:3px 0;text-shadow:0 1px 8px #0008}
+.этап i{flex:none;width:20px;height:20px;border-radius:50%;border:1px solid #fff;display:grid;place-items:center;font-style:normal;font-size:.75rem;color:transparent;transition:background .2s}
+.этап.есть i{background:#fff;color:var(--чернила)}
+.этап.есть span{opacity:.7;text-decoration:line-through}
+.сценарий-кнопка{color:#fff;border:1px solid #fff8;border-radius:99px;padding:8px;font-weight:400;font-size:.9rem}
+.кадр.закрыт{filter:saturate(.35) brightness(.8)}
+.штамп{position:absolute;z-index:3;top:26%;left:50%;font-family:var(--заголовок);font-size:1.6rem;color:#fff;border:1px solid #fff;border-radius:99px;padding:4px 22px;
+  transform:translate(-50%,-50%) rotate(-12deg) scale(0);pointer-events:none}
+.кадр.закрыт .штамп{transform:translate(-50%,-50%) rotate(-12deg) scale(1);transition:transform .35s cubic-bezier(.2,1.6,.4,1)}
+
+/* карточка сценария */
+dialog{border:0;padding:0;margin:auto;width:min(880px,94vw);max-height:92vh;border-radius:28px;background:var(--молоко);color:var(--чернила);overflow:auto}
+dialog::backdrop{background:#3a2317b3;backdrop-filter:blur(4px)}
+.карта{display:grid;grid-template-columns:260px 1fr;gap:26px;padding:26px}
+.телефон{position:sticky;top:26px;align-self:start;aspect-ratio:9/16;border-radius:26px;overflow:hidden;color:#fff;box-shadow:0 18px 30px -14px #3a2317aa}
+.надпись{position:absolute;inset:0;z-index:2;display:grid;place-items:center;text-align:center;padding:16px;font-weight:400;font-size:.95rem;line-height:1.3;white-space:pre-line;text-shadow:0 2px 12px #000b}
+.низ{position:absolute;z-index:2;left:0;right:0;bottom:14px;text-align:center;font-size:.7rem;text-shadow:0 1px 6px #000b}
+.карта h3{font-family:var(--заголовок);font-weight:400;font-size:2.2rem;line-height:1.1;margin-bottom:6px;padding-right:40px}
+.карта h4{font-weight:400;font-size:1rem;margin:20px 0 6px}
+.блок{background:#fff;border-radius:16px;padding:12px 14px;white-space:pre-line;font-size:.95rem}
+.карта ul{padding-left:20px;font-size:.93rem}.карта li{margin-bottom:4px}
+.копия{background:var(--чернила);color:#fff;border-radius:99px;padding:7px 14px;font-size:.85rem;font-weight:400;margin-top:8px}
+.закрыть{position:sticky;float:right;top:14px;margin:14px 14px 0 0;width:40px;height:40px;border-radius:50%;background:#fff;font-size:1.3rem;z-index:5}
+
+.цифры{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.цифра{border-top:1px solid var(--чернила);padding-top:12px}
+.цифра b{font-family:var(--заголовок);font-weight:300;font-size:clamp(2.2rem,4.4vw,3.4rem);line-height:1.1;display:block}
+
+.сердце{position:fixed;z-index:9;font-size:26px;pointer-events:none;animation:летит 1.6s ease-out forwards}
+@keyframes летит{to{transform:translate(var(--x),-70vh) rotate(var(--r));opacity:0}}
+
+/* Мила-указатель */
+#бегунья,#точка{position:fixed;left:0;top:0;z-index:50;pointer-events:none;display:none}
+body.с-милой #бегунья,body.с-милой #точка{display:block}
+body.с-милой,body.с-милой *{cursor:none!important}
+body.с-милой .мила > img{visibility:hidden}
+#бегунья div{position:absolute;left:0;top:0;transform-origin:30% 30%}
+#бегунья img{display:block;height:126px;width:auto;max-width:none;filter:drop-shadow(0 6px 5px #4a372b33)}
+/* точка-указатель: белая с тёмным ободком, видна и на светлой странице, и на тёмной плашке */
+#точка{width:14px;height:14px;margin:-7px;border-radius:50%;background:#fff;border:2px solid var(--чернила);box-shadow:0 0 0 2px #fff,0 2px 6px #0006}
+/* на телефоне Мила сходит с места в шапке и бежит туда, куда нажали пальцем */
+body.тап #бегунья{display:block}
+body.тап .мила > img{visibility:hidden}
+
+/* точки под плашками: где ты сейчас и переход к нужному ролику */
+.точки{display:none;justify-content:center;gap:4px}
+.точки button{width:28px;height:28px;display:grid;place-items:center}
+.точки button::before{content:"";width:8px;height:8px;border-radius:50%;border:1px solid var(--чернила);transition:all .2s}
+.точки button.тут::before{background:var(--чернила);width:22px;border-radius:99px}
+@media(max-width:1000px){
+  .лента{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(70vw,240px);overflow-x:auto;padding:6px 20px 26px;margin:0 -20px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .лента::-webkit-scrollbar{display:none}
+  .лента.тянут{scroll-snap-type:none;cursor:grabbing}
+  .кадр{scroll-snap-align:center}
+  .точки{display:flex}
+}
+/* телефон: шапка в одну строку, плашки по одной на экран, листаются пальцем */
+@media(max-width:720px){
+  main{padding:18px 16px 60px;overflow-x:hidden;display:flex;flex-direction:column}
+  /* на телефоне сначала плашки, пояснение «откуда ролики» уходит под них */
+  .путь{order:1;margin:26px 0 0}main > h2:last-of-type,.цифры{order:2}
+  h2{font-size:1.35rem;margin:40px 0 16px}
+  .цифры,.карта,.путь{grid-template-columns:1fr}.путь{gap:10px}.путь li{font-size:.84rem;padding-top:10px}
+  .шапка{gap:8px}.шапка h1 span{font-size:1.05rem;margin-bottom:10px}
+  .имя{width:min(52vw,210px);margin-left:-3px}.подпись{width:min(38vw,150px);margin-left:-4px}.черта{margin-left:4.2em}
+  .мила{flex-direction:column;align-items:flex-end;gap:4px}
+  .мила img{height:128px;margin-bottom:-5px}
+  .реплика{margin:0;max-width:150px;font-size:.8rem;padding:8px 11px;border-radius:16px 16px 4px 16px}
+  /* на экране ровно одна плашка, соседние не выглядывают */
+  .лента{grid-auto-columns:calc(100vw - 32px);gap:32px;padding:6px 16px 12px;margin:0 -16px}
+  .кадр{aspect-ratio:3/4}
+  .кадр h3{font-size:1.9rem}.этап{font-size:1.05rem;padding:6px 0}.этап i{width:26px;height:26px}.сценарий-кнопка{padding:12px;font-size:1rem}
+  .телефон{position:relative;top:0;width:200px;margin:0 auto}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <header class="шапка">
+    <div>
+      <h1><span id="день"></span><img class="имя" src="faceless.png" alt="Faceless"><img class="подпись" src="sign.png" alt="by Nyasha"></h1>
+      <div class="черта" aria-hidden="true">♥</div>
+    </div>
+    <div class="мила" id="мила">
+      <div class="реплика" id="реплика"></div>
+      <img src="mila.png" alt="Мила">
+    </div>
+  </header>
+
+  <div class="счёт"><div class="полоса"><i id="полоса"></i></div><b id="счёт"></b></div>
+
+  <h2>Сегодня</h2>
+  <ol class="путь">
+    <li><b>Разведка.</b> Claude каждое утро ищет ролики без лица, которые залетели на сотни тысяч и миллионы просмотров.</li>
+    <li><b>Разбор.</b> Смотрит, за счёт чего они зашли: длина, кадр, текст, звук.</li>
+    <li><b>Ролики на день.</b> Переносит эту формулу на твой блог: три обязательных и два по желанию.</li>
+  </ol>
+  <section class="лента" id="лента"></section>
+  <nav class="точки" id="точки" aria-label="Ролики на сегодня"></nav>
+
+  <h2>Что уже известно</h2>
+  <section class="цифры" id="цифры"></section>
+</main>
+
+<div id="точка"></div>
+<div id="бегунья"><div><img src="mila-front.png" alt=""></div></div>
+
+<dialog id="окно"><button class="закрыть" aria-label="Закрыть">×</button><div class="карта" id="карта"></div></dialog>
+
+<script src="data.js?v=202610020152"></script>
+<script>
+const Д = window.ПУЛЬТ;
+const память = {
+  взять(ключ, запас){ try { return JSON.parse(localStorage.getItem(ключ)) ?? запас } catch { return запас } },
+  положить(ключ, значение){ try { localStorage.setItem(ключ, JSON.stringify(значение)) } catch {} }
+};
+const $ = id => document.getElementById(id);
+const чисто = т => String(т).replace(/[&<>]/g, с => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[с]));
+const ЭТАПЫ = ["снято", "смонтировано", "выложено"];
+
+// галочки хранятся по дням: новый день в данных — чистый лист
+const КЛЮЧ = "пульт-" + Д.дата;
+let галочки = память.взять(КЛЮЧ, {});
+const этапы = р => галочки[р.id] ?? ЭТАПЫ.map((_, i) => i < (р.начало || 0));
+const закрыт = р => этапы(р).every(Boolean);
+
+$("день").textContent = new Date(Д.дата).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" });
+
+function лента(){
+  $("лента").innerHTML = Д.ролики.map(р => `
+    <article class="кадр ${р.обязательный ? "главный" : ""} ${закрыт(р) ? "закрыт" : ""}" data-id="${р.id}">
+      <div class="сцена ${р.сцена}"></div>
+      <div class="штамп">готово</div>
+      <div class="нутро">
+        <span class="вид">${р.обязательный ? "обязательный" : "по желанию"}</span>
+        <h3>${чисто(р.название)}</h3>
+        <div class="этапы">${ЭТАПЫ.map((э, i) =>
+          `<button class="этап ${этапы(р)[i] ? "есть" : ""}" data-этап="${i}" aria-pressed="${этапы(р)[i]}"><i>✓</i><span>${э}</span></button>`).join("")}</div>
+        <button class="сценарий-кнопка">Сценарий</button>
+      </div>
+    </article>`).join("");
+}
+
+function счёт(праздник){
+  const главные = Д.ролики.filter(р => р.обязательный), прочие = Д.ролики.filter(р => !р.обязательный);
+  const готово = главные.filter(закрыт).length, сверх = прочие.filter(закрыт).length, осталось = главные.length - готово;
+  $("полоса").style.width = (главные.length ? готово / главные.length * 100 : 0) + "%";
+  $("счёт").textContent = `${готово} из ${главные.length}` + (сверх ? ` и ещё ${сверх} по желанию` : "");
+  $("реплика").textContent =
+    !Д.ролики.length ? "Роликов на сегодня пока нет. Попроси Claude добавить." :
+    !осталось && сверх === прочие.length ? "Все ролики готовы! Идём гулять." :
+    !осталось ? "Обязательные закрыты! Можно гулять." :
+    готово === 0 ? `Гав! Сегодня обязательных роликов: ${главные.length}. И ${прочие.length} по желанию.` :
+    `Хорошо идём! Осталось обязательных: ${осталось}.`;
+  if (праздник && !осталось) ура();
+}
+
+function ура(){
+  window.милаРадуется?.();
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  for (let i = 0; i < 18; i++){
+    const с = document.createElement("div");
+    с.className = "сердце"; с.textContent = "🤍";
+    с.style.cssText = `left:${10 + Math.random() * 80}vw;bottom:-30px;--x:${Math.random() * 120 - 60}px;--r:${Math.random() * 90 - 45}deg;animation-delay:${Math.random() * .5}s`;
+    document.body.append(с); setTimeout(() => с.remove(), 2400);
+  }
+}
+
+let открыт = null;
+
+function сценарий(id){
+  const р = Д.ролики.find(р => р.id === id); if (!р) return;
+  открыт = id;
+  const блок = (заголовок, текст, ключ) => !текст ? "" :
+    `<h4>${заголовок}</h4><div class="блок">${чисто(текст)}</div><button class="копия" data-копия="${ключ}">Скопировать</button>`;
+  $("карта").innerHTML = `
+    <div class="телефон"><div class="сцена ${р.сцена}"></div>
+      <div class="надпись">${чисто(р.наЭкране || "")}</div>
+      ${р.наЭкране ? `<div class="низ">читай описание ↓</div>` : ""}</div>
+    <div>
+      <h3>${чисто(р.название)}</h3>
+      ${р.основа ? `<p>Формула: ${чисто(р.основа)}</p>` : ""}
+      ${р.заметка ? `<h4>Заметка</h4><div class="блок">${чисто(р.заметка)}</div>` : ""}
+      ${р.кадр ? `<h4>Что снять</h4><div class="блок">${чисто(р.кадр)}</div>` : ""}
+      ${блок("Текст на экране", р.наЭкране, "наЭкране")}
+      <h4>Как оформить</h4><ul>${Д.правила.map(п => `<li>${чисто(п)}</li>`).join("")}</ul>
+      ${блок("Описание под роликом", Д.описание, "описание")}
+      ${блок("Ответ в директ на «БЕЗ ЛИЦА»", Д.директ, "директ")}
+    </div>`;
+  if (!$("окно").open) $("окно").showModal();
+  $("окно").scrollTop = 0;
+}
+
+$("окно").addEventListener("click", e => {
+  if (e.target === $("окно") || e.target.closest(".закрыть")) return $("окно").close();
+  const коп = e.target.closest(".копия"); if (!коп) return;
+  const р = Д.ролики.find(р => р.id === открыт);
+  const текст = коп.dataset.копия === "наЭкране" ? р.наЭкране : Д[коп.dataset.копия];
+  navigator.clipboard.writeText(текст).then(
+    () => { коп.textContent = "Скопировано"; setTimeout(() => коп.textContent = "Скопировать", 1500) },
+    () => { коп.textContent = "Не вышло, выдели текст сама" });
+});
+
+$("лента").addEventListener("click", e => {
+  const кадр = e.target.closest(".кадр"); if (!кадр) return;
+  const р = Д.ролики.find(р => р.id === кадр.dataset.id);
+  if (e.target.closest(".сценарий-кнопка")) return сценарий(р.id);
+  const к = e.target.closest(".этап"); if (!к) return;
+  const был = закрыт(р), мои = [...этапы(р)];
+  мои[к.dataset.этап] = !мои[к.dataset.этап];
+  галочки[р.id] = мои; память.положить(КЛЮЧ, галочки);
+  к.classList.toggle("есть", мои[к.dataset.этап]); к.setAttribute("aria-pressed", мои[к.dataset.этап]);
+  кадр.classList.toggle("закрыт", закрыт(р));
+  счёт(!был && закрыт(р));
+});
+
+// Листание плашек вбок: точки под лентой и перетаскивание мышкой (пальцем лента листается сама)
+(function(){
+  const л = $("лента"), т = $("точки");
+  т.innerHTML = Д.ролики.map((р, i) => `<button data-n="${i}" aria-label="Ролик ${i + 1}: ${чисто(р.название)}"></button>`).join("");
+  const ближний = () => {
+    const центр = л.getBoundingClientRect().left + л.clientWidth / 2;
+    let лучший = 0, мин = Infinity;
+    [...л.children].forEach((к, i) => { const r = к.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - центр); if (d < мин){ мин = d; лучший = i; } });
+    return лучший;
+  };
+  const отметить = () => [...т.children].forEach((к, i) => к.classList.toggle("тут", i === ближний()));
+  const к = n => л.children[n]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  т.addEventListener("click", e => { const б = e.target.closest("button"); if (б) к(+б.dataset.n); });
+  л.addEventListener("scroll", отметить, { passive: true });
+  отметить();
+
+  let старт = null, сдвиг = 0;
+  л.addEventListener("pointerdown", e => { if (e.pointerType === "mouse") старт = { x: e.clientX, лево: л.scrollLeft }; сдвиг = 0; });
+  addEventListener("pointermove", e => {
+    if (!старт) return;
+    сдвиг = e.clientX - старт.x;
+    if (Math.abs(сдвиг) > 5){ л.classList.add("тянут"); л.scrollLeft = старт.лево - сдвиг; }
+  });
+  addEventListener("pointerup", () => {
+    if (!старт) return;
+    старт = null;
+    if (л.classList.contains("тянут")){ const n = ближний(); л.classList.remove("тянут"); к(n); }
+  });
+  // если плашку тянули, а не нажимали, галочка под мышкой не должна сработать
+  л.addEventListener("click", e => { if (Math.abs(сдвиг) > 5){ e.stopPropagation(); сдвиг = 0; } }, true);
+})();
+
+// Мила вместо стрелки: идёт за мышкой боком, остановилась — смотрит на тебя, по щелчку встаёт и нажимает лапкой
+(function(){
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const б = $("бегунья"), рамка = б.firstElementChild, фото = рамка.firstElementChild, точка = $("точка");
+  // якорь — место лапок на кадре (доли ширины и высоты): именно оно встаёт под указатель
+  const ПОЗЫ = {
+    ждёт: { файл: "mila-front.png", ax: .47, ay: .94, рост: 126 },
+    идёт: { файл: "mila-side.png",   ax: .61, ay: .93, рост: 126 },   // на кадре смотрит вправо
+    жмёт: { файл: "mila-paw.png",  ax: .30, ay: .29, рост: 120 }
+  };
+  for (const п of Object.values(ПОЗЫ)) new Image().src = п.файл;
+  let цель = null, x = 0, y = 0, влево = true, жмётДо = 0, показано = "";
+
+  function поза(имя, зеркало){
+    const п = ПОЗЫ[имя];
+    if (показано !== имя){ фото.src = п.файл; фото.style.height = п.рост * (чем === "mouse" ? 1 : .72) + "px"; показано = имя; }
+    фото.style.transform = зеркало ? "scaleX(-1)" : "none";
+    рамка.style.translate = `${-(зеркало ? 1 - п.ax : п.ax) * 100}% ${-п.ay * 100}%`;
+  }
+  window.милаРадуется = () => рамка.animate(
+    [{ transform: "none" }, { transform: "translateY(-26px)" }, { transform: "none" }], { duration: 420, iterations: 3, easing: "ease-out" });
+
+  addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") return;
+    if (!цель){
+      const д = document.querySelector(".мила > img")?.getBoundingClientRect();
+      x = д ? д.left + д.width / 2 : e.clientX; y = д ? д.bottom : e.clientY;
+      document.body.classList.add("с-милой");
+    }
+    цель = { x: e.clientX, y: e.clientY };
+    точка.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+  });
+  document.documentElement.addEventListener("mouseleave", () => { цель = null; document.body.classList.remove("с-милой") });
+  let нажмёт = false, чем = "mouse", кнопка = null, запас = 0, пропустить = false;
+  const толчок = () => рамка.animate([{ scale: 1 }, { scale: 1.12 }, { scale: 1 }], { duration: 320, easing: "ease-out" });
+  addEventListener("pointerdown", e => {
+    чем = e.pointerType;
+    if (чем === "mouse"){ жмётДо = performance.now() + 650; толчок(); }
+  });
+  // палец: Мила выскакивает с лапкой только на настоящее нажатие, а не когда листаешь
+  addEventListener("click", e => {
+    if (чем === "mouse" || пропустить) return;
+    // Нажатие придерживаем: Мила добегает, жмёт лапкой, и только тогда кнопка срабатывает
+    e.preventDefault(); e.stopPropagation();
+    if (!цель){
+      const д = document.querySelector(".мила > img")?.getBoundingClientRect();
+      x = д ? д.left + д.width / 2 : e.clientX; y = д ? д.bottom : e.clientY;
+      document.body.classList.add("тап");
+    }
+    сработать();   // если предыдущее нажатие ещё ждало Милу, не теряем его
+    цель = { x: e.clientX, y: e.clientY }; нажмёт = true; кнопка = e.target;
+    запас = setTimeout(сработать, 700);   // на случай, если Мила не успела добежать
+  }, true);
+  function сработать(){
+    clearTimeout(запас);
+    const к = кнопка; кнопка = null;
+    if (!к || !к.isConnected) return;
+    пропустить = true; к.click(); пропустить = false;
+  }
+
+  // в открытом окне сценария Мила должна быть поверх него
+  new MutationObserver(() => ($("окно").open ? $("окно") : document.body).append(точка, б))
+    .observe($("окно"), { attributes: true, attributeFilter: ["open"] });
+
+  (function шаг(){
+    if (цель){
+      const dx = цель.x - x, dy = цель.y - y, идёт = Math.hypot(dx, dy) > 8;
+      x += dx * .22; y += dy * .22;
+      if (Math.abs(dx) > 8) влево = dx < 0;
+      if (нажмёт && !идёт){ нажмёт = false; жмётДо = performance.now() + 700; толчок(); setTimeout(сработать, 140); }
+      if (performance.now() < жмётДо) поза("жмёт", false);
+      else if (идёт) поза("идёт", влево);
+      else поза("ждёт", false);
+      б.style.transform = `translate(${x}px,${y}px)`;
+    }
+    requestAnimationFrame(шаг);
+  })();
+})();
+
+$("цифры").innerHTML = Д.цифры.map(ц => `<div class="цифра"><b>${ц.число}</b>${ц.подпись}</div>`).join("");
+лента(); счёт(false);
+if (location.hash) сценарий(decodeURIComponent(location.hash.slice(1)));
+</script>
+</body>
+</html>
