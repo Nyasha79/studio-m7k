@@ -60,6 +60,7 @@ h2{font-family:var(--заголовок);font-weight:400;font-size:1.7rem;margin
 .вид{align-self:flex-start;background:#ffffff26;backdrop-filter:blur(6px);border:1px solid #ffffff55;border-radius:99px;padding:3px 11px;font-size:.78rem;font-weight:400}
 .кадр.главный .вид{background:#fff;color:var(--чернила);border-color:#fff}
 .кадр h3{font-family:var(--заголовок);font-weight:400;font-size:1.5rem;line-height:1.05;margin:auto 0 12px;text-shadow:0 2px 14px #0007}
+.кадр h3 small{display:block;font-family:var(--текст);font-size:.8rem;font-weight:400;margin-bottom:6px;opacity:.9}
 .этапы{display:grid;gap:6px;margin-bottom:10px}
 .этап{display:flex;align-items:center;gap:9px;text-align:left;color:#fff;font-size:.9rem;font-weight:400;padding:3px 0;text-shadow:0 1px 8px #0008}
 .этап i{flex:none;width:20px;height:20px;border-radius:50%;border:1px solid #fff;display:grid;place-items:center;font-style:normal;font-size:.75rem;color:transparent;transition:background .2s}
@@ -171,9 +172,10 @@ body.тап .мила > img{visibility:hidden}
 
 <dialog id="окно"><button class="закрыть" aria-label="Закрыть">×</button><div class="карта" id="карта"></div></dialog>
 
-<script src="data.js?v=202610020204"></script>
+<script src="data.js?v=202610020224"></script>
 <script>
-const Д = window.ПУЛЬТ;
+// данные на день пишет утренняя рутина; если файл не дошёл или в нём ошибка, пульт открывается пустым, а не белым экраном
+const Д = Object.assign({ дата: new Date().toISOString().slice(0, 10), ролики: [], правила: [], цифры: [] }, window.ПУЛЬТ);
 const память = {
   взять(ключ, запас){ try { return JSON.parse(localStorage.getItem(ключ)) ?? запас } catch { return запас } },
   положить(ключ, значение){ try { localStorage.setItem(ключ, JSON.stringify(значение)) } catch {} }
@@ -197,7 +199,7 @@ function лента(){
       <div class="штамп">готово</div>
       <div class="нутро">
         <span class="вид">${р.обязательный ? "обязательный" : "по желанию"}</span>
-        <h3>${чисто(р.название)}</h3>
+        <h3>${р.вид ? `<small>${чисто(р.вид)}</small>` : ""}${чисто(р.название)}</h3>
         <div class="этапы">${ЭТАПЫ.map((э, i) =>
           `<button class="этап ${этапы(р)[i] ? "есть" : ""}" data-этап="${i}" aria-pressed="${этапы(р)[i]}"><i>✓</i><span>${э}</span></button>`).join("")}</div>
         <button class="сценарий-кнопка">Сценарий</button>
@@ -230,13 +232,15 @@ function ура(){
   }
 }
 
-let открыт = null;
+let открыт = null, тексты = {};
 
 function сценарий(id){
   const р = Д.ролики.find(р => р.id === id); if (!р) return;
   открыт = id;
-  const блок = (заголовок, текст, ключ) => !текст ? "" :
-    `<h4>${заголовок}</h4><div class="блок">${чисто(текст)}</div><button class="копия" data-копия="${ключ}">Скопировать</button>`;
+  // у ролика может быть своё описание и свой ответ в директ; если нет, берём общие на день
+  тексты = { наЭкране: р.наЭкране, описание: р.описание || Д.описание, закреп: р.закреп, директ: р.директ || Д.директ };
+  const блок = (заголовок, ключ) => !тексты[ключ] ? "" :
+    `<h4>${заголовок}</h4><div class="блок">${чисто(тексты[ключ])}</div><button class="копия" data-копия="${ключ}">Скопировать</button>`;
   $("карта").innerHTML = `
     <div class="телефон"><div class="сцена ${р.сцена}"></div>
       <div class="надпись">${чисто(р.наЭкране || "")}</div>
@@ -246,10 +250,13 @@ function сценарий(id){
       ${р.основа ? `<p>Формула: ${чисто(р.основа)}</p>` : ""}
       ${р.заметка ? `<h4>Заметка</h4><div class="блок">${чисто(р.заметка)}</div>` : ""}
       ${р.кадр ? `<h4>Что снять</h4><div class="блок">${чисто(р.кадр)}</div>` : ""}
-      ${блок("Текст на экране", р.наЭкране, "наЭкране")}
-      <h4>Как оформить</h4><ul>${Д.правила.map(п => `<li>${чисто(п)}</li>`).join("")}</ul>
-      ${блок("Описание под роликом", Д.описание, "описание")}
-      ${блок("Ответ в директ на «БЕЗ ЛИЦА»", Д.директ, "директ")}
+      ${блок("Текст на экране", "наЭкране")}
+      ${р.звук ? `<h4>Звук</h4><div class="блок">${чисто(р.звук)}</div>` : ""}
+      ${Д.правила.length ? `<h4>Как оформить</h4><ul>${Д.правила.map(п => `<li>${чисто(п)}</li>`).join("")}</ul>` : ""}
+      ${блок("Описание под роликом", "описание")}
+      ${блок("Закреплённый комментарий", "закреп")}
+      ${блок(`Ответ в директ на «${чисто(р.слово || "БЕЗ ЛИЦА")}»`, "директ")}
+      ${р.подарок ? `<p style="margin-top:14px">Подарок за кодовое слово: ${чисто(р.подарок)}</p>` : ""}
     </div>`;
   if (!$("окно").open) $("окно").showModal();
   $("окно").scrollTop = 0;
@@ -258,9 +265,7 @@ function сценарий(id){
 $("окно").addEventListener("click", e => {
   if (e.target === $("окно") || e.target.closest(".закрыть")) return $("окно").close();
   const коп = e.target.closest(".копия"); if (!коп) return;
-  const р = Д.ролики.find(р => р.id === открыт);
-  const текст = коп.dataset.копия === "наЭкране" ? р.наЭкране : Д[коп.dataset.копия];
-  navigator.clipboard.writeText(текст).then(
+  navigator.clipboard.writeText(тексты[коп.dataset.копия]).then(
     () => { коп.textContent = "Скопировано"; setTimeout(() => коп.textContent = "Скопировать", 1500) },
     () => { коп.textContent = "Не вышло, выдели текст сама" });
 });
