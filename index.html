@@ -83,6 +83,9 @@ dialog::backdrop{background:#3a2317b3;backdrop-filter:blur(4px)}
 .карта h4{font-weight:400;font-size:1rem;margin:20px 0 6px}
 .блок{background:#fff;border-radius:16px;padding:12px 14px;white-space:pre-line;font-size:.95rem}
 .карта ul{padding-left:20px;font-size:.93rem}.карта li{margin-bottom:4px}
+.хук{margin-bottom:12px}
+.хук .блок{display:block;width:100%;text-align:left;font-family:var(--заголовок);font-size:1.25rem;line-height:1.2;border:1px solid transparent}
+.хук.выбран .блок{border-color:var(--чернила)}
 .копия{background:var(--чернила);color:#fff;border-radius:99px;padding:7px 14px;font-size:.85rem;font-weight:400;margin-top:8px}
 .закрыть{position:sticky;float:right;top:14px;margin:14px 14px 0 0;width:40px;height:40px;border-radius:50%;background:#fff;font-size:1.3rem;z-index:5}
 
@@ -172,7 +175,7 @@ body.тап .мила > img{visibility:hidden}
 
 <dialog id="окно"><button class="закрыть" aria-label="Закрыть">×</button><div class="карта" id="карта"></div></dialog>
 
-<script src="data.js?v=202610021809"></script>
+<script src="data.js?v=202610021812"></script>
 <script>
 // данные на день пишет утренняя рутина; если файл не дошёл или в нём ошибка, пульт открывается пустым, а не белым экраном
 const Д = Object.assign({ дата: new Date().toISOString().slice(0, 10), ролики: [], правила: [], цифры: [] }, window.ПУЛЬТ);
@@ -238,18 +241,24 @@ function сценарий(id){
   const р = Д.ролики.find(р => р.id === id); if (!р) return;
   открыт = id;
   // у ролика может быть своё описание и свой ответ в директ; если нет, берём общие на день
-  тексты = { наЭкране: р.наЭкране, описание: р.описание || Д.описание, закреп: р.закреп, директ: р.директ || Д.директ };
+  тексты = { описание: р.описание || Д.описание, закреп: р.закреп, директ: р.директ || Д.директ };
+  // хук на экран: несколько коротких вариантов на выбор; у старых роликов вариант один
+  const хуки = р.хуки?.length ? р.хуки : (р.наЭкране ? [р.наЭкране] : []);
+  хуки.forEach((х, i) => тексты["хук" + i] = х);
   const блок = (заголовок, ключ) => !тексты[ключ] ? "" :
     `<h4>${заголовок}</h4><div class="блок">${чисто(тексты[ключ])}</div><button class="копия" data-копия="${ключ}">Скопировать</button>`;
   $("карта").innerHTML = `
     <div class="телефон"><div class="сцена ${р.сцена}"></div>
-      <div class="надпись">${чисто(р.наЭкране || "")}</div>
-      ${р.наЭкране ? `<div class="низ">читай описание ↓</div>` : ""}</div>
+      <div class="надпись" id="надпись">${чисто(хуки[0] || "")}</div>
+      ${хуки.length ? `<div class="низ">читай описание ↓</div>` : ""}</div>
     <div>
       <h3>${чисто(р.название)}</h3>
       ${р.заметка ? `<h4>Заметка</h4><div class="блок">${чисто(р.заметка)}</div>` : ""}
+      ${хуки.length ? `<h4>${хуки.length > 1 ? "Хук на экран: выбери вариант" : "Текст на экране"}</h4>` + хуки.map((х, i) => `
+        <div class="хук ${i ? "" : "выбран"}"><button class="блок" data-хук="${i}">${чисто(х)}</button>
+        <button class="копия" data-копия="хук${i}">Скопировать</button></div>`).join("") : ""}
+      ${р.зацеп ? `<h4>Первые две секунды</h4><div class="блок">${чисто(р.зацеп)}</div>` : ""}
       ${р.кадр ? `<h4>Что снять</h4><div class="блок">${чисто(р.кадр)}</div>` : ""}
-      ${блок("Текст на экране", "наЭкране")}
       ${р.звук ? `<h4>Звук</h4><div class="блок">${чисто(р.звук)}</div>` : ""}
       ${Д.правила.length ? `<h4>Как оформить</h4><ul>${Д.правила.map(п => `<li>${чисто(п)}</li>`).join("")}</ul>` : ""}
       ${блок("Описание под роликом", "описание")}
@@ -263,6 +272,13 @@ function сценарий(id){
 
 $("окно").addEventListener("click", e => {
   if (e.target === $("окно") || e.target.closest(".закрыть")) return $("окно").close();
+  // нажатие на вариант хука показывает его на телефоне слева
+  const х = e.target.closest("[data-хук]");
+  if (х){
+    $("надпись").textContent = тексты["хук" + х.dataset.хук];
+    document.querySelectorAll(".хук").forEach(э => э.classList.toggle("выбран", э.contains(х)));
+    return;
+  }
   const коп = e.target.closest(".копия"); if (!коп) return;
   navigator.clipboard.writeText(тексты[коп.dataset.копия]).then(
     () => { коп.textContent = "Скопировано"; setTimeout(() => коп.textContent = "Скопировать", 1500) },
